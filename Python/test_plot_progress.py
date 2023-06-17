@@ -21,7 +21,12 @@ print('Done.')
 print('Home Axis')
 print('G28 X')
 print('Done.')
-print('')
+print('Absolute Mode Positioning')
+print('G90')
+print('Done.')
+print('Extruder Relative Mode')
+print('M83')
+print('Done.')
 
 
 ion()
@@ -51,7 +56,7 @@ for layer in range(layers):
 for layer in range(layers):
     for turn in range(turns_per_layer):
         print('G0 X%0.02f'%x_positions[layer][turn])
-        print('ROTATE 1 TIME')
+        print('G0 E1') # Apply 1 turn 1 time
         circles[layer][turn].set_color('green')
         pause(0.1)
 
