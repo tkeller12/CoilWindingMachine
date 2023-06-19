@@ -2,42 +2,52 @@ import serial
 from serial.tools import list_ports
 import time
 
+VID = 1155 # Vendor ID, USB Device
+PID = 22336 # Product ID, USB Device
 
-TIMEOUT = 1.0
+TIMEOUT = 3.0
 BAUDRATE = 115200
 
 MAX_ATTEMPTS = 1000
 
 X_MIN = 0
-X_MAX = 100
+X_MAX = 200
 
 TURNS_MIN = -1000
 TURNS_MAX = 1000
 
-STEPS_PER_MM = 93.00
+STEPS_PER_MM = 93.00 # For Extruder
 STEPS_PER_REV = 200.00
 E_MICROSTEPS = 16.
 
 E_MAX_RELATIVE_MOVE = 200.
 
+FEED_RATE_MIN = 100.
+FEED_RATE_MAX = 10800.
+
+#WIND_RPM_MIN = 1. # need to calculate in mm/sec
+#WIND_RPM_MAX = 25.
+
 MM_PER_REV = E_MICROSTEPS * STEPS_PER_REV / STEPS_PER_MM
 
 class Winder:
     def __init__(self, port = None, verbose = False):
+
+        self.verbose = verbose
+
         if port is None:
             port = self.autodetect()
         self._port = port
         self._ser = None
 
         self.open()
-        self.verbose = verbose
         self._abs_turns = 0
 
     def autodetect(self):
         for p in list_ports.comports():
-            if p.vid == 6790:
+            if p.vid == VID and p.pid == PID:
                 return p.device
-        raise RuntimeError('Unable to Automatically detect serial port.\nPlease enter port manually')
+        raise RuntimeError('Unable to Automatically detect serial port.\nPlease Confirm Device is Plugged in or Enter Port Manually')
 
     def open(self):
         print('Attempting to open serial...')
@@ -46,7 +56,7 @@ class Winder:
         self._ser = serial.Serial(port = self._port, baudrate = BAUDRATE, timeout = TIMEOUT)
 
         print('Waiting for Initialization...')
-        time.sleep(1)
+        time.sleep(5)
 
         attempts = 0
 #        while self._ser.inWaiting == 0 and attempts < 100:
@@ -54,7 +64,9 @@ class Winder:
 #            time.sleep(0.1)
 
         while self._ser.inWaiting():
-            self.read()
+            out = self.read()
+            if self.verbose:
+                print(out)
 
         print('Done.')
 
@@ -66,10 +78,16 @@ class Winder:
 
     def write(self, command):
         command += '\n'
+        if self.verbose:
+            print('Sending Command:', repr(command))
         self._ser.write(command.encode('utf-8'))
 
     def read(self):
-        return self._ser.readline().decode('utf-8').strip()
+        out = self._ser.readline().decode('utf-8').strip()
+        if self.verbose:
+            print('Reading:', repr(out))
+        return out
+
 
     def query(self, command):
         self.write(command)
@@ -83,7 +101,15 @@ class Winder:
         self._x = 0
 
     def flush(self):
-        self._ser.flush()
+        if self.verbose:
+            print('Flushing Buffer...')
+            if self._ser.inWaiting() > 0:
+                print('Flushing %i Bytes in Waiting.'%self._ser.inWaiting())
+        self._ser.reset_input_buffer()
+        self._ser.reset_output_buffer()
+        if self.verbose:
+            print('Bytes in Waiting after Flush:', self._ser.inWaiting())
+            print('Done Flushing.')
     
     def override_extrude(self):
         self.flush()
@@ -108,12 +134,29 @@ class Winder:
 
     def set_x(self, x):
         self.flush()
-        if x < 0 or x > 100:
+        if x < X_MIN or x > X_MAX:
             raise ValueError('X value out of bounds. Value of "x" must be between %0.02f and %0.02f'%(X_MIN, X_MAX))
         command = 'G0 X%0.02f'%x
         self.write(command)
         self.wait_until_finished()
         self._x = x
+
+    def finish_moves(self):
+        if self.verbose:
+            print('Waiting for moves to finish...')
+        self.write('M400')
+        self.wait_until_finished()
+        if self.verbose:
+            print('Moves Finished.')
+
+    def set_rate(self, rate):
+        ''' Set the Feed Rate in mm/min'''
+
+        if rate < FEED_RATE_MIN or rate > FEED_RATE_MAX:
+            raise ValueError('Feed Rate of %i is out of range. must be between %i and %i.'%(rate, FEED_RATE_MIN, FEED_RATE_MAX))
+
+        self.write('G0 F%0.02f'%rate)
+        self.wait_until_finished()
 
     def rotate(self, turns):
         self.flush()
@@ -131,7 +174,9 @@ class Winder:
 
 
 if __name__ == '__main__':
-    w = Winder()
+    w = Winder(verbose = True)
+#    w.write('M914 X60')
+#    w.wait_until_finished()
     w.home()
     w.e_relative()
     w.override_extrude()
@@ -139,6 +184,14 @@ if __name__ == '__main__':
     w.read()
     w.write('G0 Y10')
     w.read()
+    w.set_rate(10000)
     w.set_x(10)
     w.rotate(1)
+    w.finish_moves()
+    w.set_x(100)
+    w.rotate(1)
+    w.finish_moves()
+    w.set_x(10)
+    w.rotate(1)
+    w.finish_moves()
 
