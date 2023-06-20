@@ -172,6 +172,18 @@ class Winder:
         self._abs_turns += turns
         self._turns = turns
 
+    def unconditional_stop(self, expire_time = None, message = ''):
+        '''Issue Unconditional Stop Command - M0'''
+        self.flush()
+        command = 'M0'
+        if expire_time is not None:
+            if expire_time > 0:
+                command += ' S%i'%expire_time
+
+        command += message
+
+        self.write(command)
+        self.wait_until_finished()
 
 if __name__ == '__main__':
     w = Winder(verbose = True)
@@ -188,7 +200,7 @@ if __name__ == '__main__':
     w.set_x(10)
     w.rotate(1)
     w.finish_moves()
-    w.set_x(100)
+    w.set_x(20)
     w.rotate(1)
     w.finish_moves()
     w.set_x(10)
