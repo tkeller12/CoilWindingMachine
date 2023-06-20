@@ -19,6 +19,8 @@ w.set_rate(10000)
 
 w.finish_moves()
 
+w.unconditional_stop(message = 'Prepare Wire. Press Continue when Ready.')
+
 
 x_start = 25
 
