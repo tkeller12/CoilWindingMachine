@@ -17,6 +17,7 @@ TURNS_MIN = -1000
 TURNS_MAX = 1000
 
 STEPS_PER_MM = 93.00 # For Extruder
+#STEPS_PER_MM = 800.00 # For Extruder
 STEPS_PER_REV = 200.00
 E_MICROSTEPS = 16.
 
@@ -140,6 +141,26 @@ class Winder:
         self.write(command)
         self.wait_until_finished()
         self._x = x
+
+    def set_x_rotate(self, x, turns):
+        self.flush()
+        if x < X_MIN or x > X_MAX:
+            raise ValueError('X value out of bounds. Value of "x" must be between %0.02f and %0.02f'%(X_MIN, X_MAX))
+        x_command = ' X%0.02f'%x
+        self._x = x
+
+        if turns < TURNS_MIN or turns > TURNS_MAX:
+            raise ValueError('X value out of bounds. Value of "turns" must be between %0.02f and %0.02f'%(TURNS_MIN, TURNS_MAX))
+        move_mm = turns * MM_PER_REV
+
+        if move_mm > E_MAX_RELATIVE_MOVE:
+            raise ValueError('Movement in mm is %0.02f. This exceeds the maximum value of %0.02f'%(move_mm, E_MAX_RELATIVE_MOVE))
+        e_command = ' E%0.02f'%(turns * MM_PER_REV)
+        command = 'G0' + x_command + e_command
+        self.write(command)
+        self.wait_until_finished()
+        self._abs_turns += turns
+        self._turns = turns
 
     def finish_moves(self):
         if self.verbose:

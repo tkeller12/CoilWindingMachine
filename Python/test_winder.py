@@ -12,14 +12,22 @@ w.home()
 w.e_relative()
 w.override_extrude()
 w.write('G0 Z10')
-w.read()
 w.write('G0 X10 Y10')
-w.read()
 w.set_rate(10000)
+#
+#
+#print('Report Current Position:')
+#w.flush()
+#w.write('M154 S1')
+#w.write('M155 S1')
+##for ix in range(100):
+##    w.read()
+#print('Done.')
 
-w.finish_moves()
 
-w.unconditional_stop(message = 'Prepare Wire. Press Continue when Ready.')
+
+#w.unconditional_stop(message = 'Prepare Wire.')
+
 
 
 x_start = 25
@@ -81,17 +89,16 @@ for ix in range(layers):
 
 for layer in range(layers):
     for turn in range(turns_per_layer):
-#        print('G0 X%0.02f'%x_positions[layer][turn])
-#        print('G0 E1') # Apply 1 turn 1 time
 
-        circles[layer][turn].set_color('orange')
-        pause(0.01)
-        w.set_x(x_positions[layer][turn])
-        w.rotate(1)
-        w.finish_moves()
+#        circles[layer][turn].set_color('orange')
+#        pause(0.01)
+#        w.set_x(x_positions[layer][turn])
+#        w.rotate(1)
+        w.set_x_rotate(x_positions[layer][turn], 1)
+#        w.finish_moves()
 
-        circles[layer][turn].set_color('green')
-        pause(0.01)
+#        circles[layer][turn].set_color('green')
+#        pause(0.01)
 
 
 
