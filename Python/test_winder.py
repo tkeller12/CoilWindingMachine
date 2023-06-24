@@ -7,13 +7,15 @@ import time
 import serial
 
 w = winder.Winder(verbose = True)
+w.finish_moves()
 
-w.home()
+#w.home()
 w.e_relative()
 w.override_extrude()
-w.write('G0 Z10')
-w.write('G0 X10 Y10')
-w.set_rate(10000)
+#w.write('G0 Z10')
+#w.write('G0 X10 Y10')
+#w.set_rate(10000)
+w.set_feedrate_percent(100)
 #
 #
 #print('Report Current Position:')
@@ -30,7 +32,7 @@ w.set_rate(10000)
 
 
 
-x_start = 25
+x_start = 0
 
 turns_per_layer = 12 # number of turns per layer
 layers = 10 # number of layers

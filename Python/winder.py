@@ -206,25 +206,57 @@ class Winder:
         self.write(command)
         self.wait_until_finished()
 
+    def set_current_position(self, x, e):
+        '''Set the current position (does not move steppers)'''
+
+        self.flush()
+        command = 'G92 X%0.02f E%0.02f'%(x,e)
+
+        self.write(command)
+        self.wait_until_finished()
+
+    def zero_current_position(self):
+        '''Set the current position to zero'''
+
+        self.set_current_position(0,0)
+
+    def set_feedrate_percent(self, percent):
+        '''Set percent max feedrate'''
+
+        self.flush()
+        command = 'M220 S%0.02f'%percent
+
+        self.write(command)
+        self.wait_until_finished()
+
+
+
 if __name__ == '__main__':
     w = Winder(verbose = True)
+#    w.zero_current_position()
+#    w.set_x(10)
+#    w.finish_moves()
+#    w.zero_current_position()
 #    w.write('M914 X60')
 #    w.wait_until_finished()
+    w.set_feedrate_percent(10)
     w.home()
-    w.e_relative()
-    w.override_extrude()
-    w.write('G0 Z10')
-    w.read()
-    w.write('G0 Y10')
-    w.read()
-    w.set_rate(10000)
-    w.set_x(10)
-    w.rotate(1)
     w.finish_moves()
+    w.set_feedrate_percent(100)
     w.set_x(20)
-    w.rotate(1)
     w.finish_moves()
-    w.set_x(10)
-    w.rotate(1)
-    w.finish_moves()
-
+#    w.e_relative()
+#    w.override_extrude()
+#    w.read()
+#    w.read()
+#    w.set_rate(10000)
+#    w.set_x(10)
+#    w.rotate(1)
+#    w.finish_moves()
+#    w.set_x(20)
+#    w.rotate(1)
+#    w.finish_moves()
+#    w.set_x(10)
+#    w.rotate(1)
+#    w.finish_moves()
+#
