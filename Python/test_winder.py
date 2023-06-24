@@ -8,6 +8,8 @@ import serial
 
 w = winder.Winder(verbose = True)
 w.finish_moves()
+w.set_feedrate_percent(100)
+w.zero_current_position()
 
 #w.home()
 w.e_relative()
@@ -15,7 +17,7 @@ w.override_extrude()
 #w.write('G0 Z10')
 #w.write('G0 X10 Y10')
 #w.set_rate(10000)
-w.set_feedrate_percent(100)
+#w.set_feedrate_percent(100)
 #
 #
 #print('Report Current Position:')
@@ -41,8 +43,6 @@ turns = turns_per_layer * layers
 wire_diameter = 0.85
 radius = wire_diameter / 2.
 
-port = 'COM6'
-#ser = serial.Serial(power, baudrate = 115200,timeout = 1)
 
 print('Wait for device to initialize...')
 time.sleep(0.1)
