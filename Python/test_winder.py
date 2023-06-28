@@ -8,8 +8,9 @@ import serial
 
 w = winder.Winder(verbose = True)
 w.finish_moves()
-w.set_feedrate_percent(100)
+#w.set_feedrate_percent(100)
 w.zero_current_position()
+w.finish_moves()
 
 #w.home()
 w.e_relative()
@@ -36,11 +37,11 @@ w.override_extrude()
 
 x_start = 0
 
-turns_per_layer = 12 # number of turns per layer
-layers = 10 # number of layers
+turns_per_layer = 25 # number of turns per layer
+layers = 1 # number of layers
 turns = turns_per_layer * layers
 
-wire_diameter = 0.85
+wire_diameter = 0.45
 radius = wire_diameter / 2.
 
 

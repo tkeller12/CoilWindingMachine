@@ -16,10 +16,10 @@ X_MAX = 200
 TURNS_MIN = -1000
 TURNS_MAX = 1000
 
-STEPS_PER_MM = 93.00 # For Extruder
 #STEPS_PER_MM = 800.00 # For Extruder
 STEPS_PER_REV = 200.00
 E_MICROSTEPS = 16.
+STEPS_PER_MM = 3200.00 # For Extruder
 
 E_MAX_RELATIVE_MOVE = 200.
 
@@ -229,11 +229,20 @@ class Winder:
         self.write(command)
         self.wait_until_finished()
 
+    def set_flow_percent(self, percent):
+        '''Set percent max flow rate'''
 
+        self.flush()
+        command = 'M221 S%0.02f'%percent
+
+        self.write(command)
+        self.wait_until_finished()
 
 if __name__ == '__main__':
     w = Winder(verbose = True)
-#    w.zero_current_position()
+    w.zero_current_position()
+    w.override_extrude()
+    w.e_relative()
 #    w.set_x(10)
 #    w.finish_moves()
 #    w.zero_current_position()
@@ -245,8 +254,6 @@ if __name__ == '__main__':
 #    w.set_feedrate_percent(100)
 #    w.set_x(20)
 #    w.finish_moves()
-#    w.e_relative()
-#    w.override_extrude()
 #    w.read()
 #    w.read()
 #    w.set_rate(10000)
